@@ -1,9 +1,10 @@
 import urllib2, psycopg2, json
 from insertSong import insertSong
 
-playlistId = raw_input()
+playlistId = raw_input('playlist id: ')
+authCode = raw_input('auth code: ')
 request = urllib2.Request("https://api.spotify.com/v1/users/spotify/playlists/%s/tracks" % (playlistId))
-request.add_header("Authorization", "Bearer <oauthcode>")
+request.add_header("Authorization", "Bearer %s" % (authCode))
 response = urllib2.urlopen(request)
 result = response.read()
 jsRes = json.loads(result)

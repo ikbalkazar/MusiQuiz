@@ -17,17 +17,20 @@ import java.sql.SQLException;
  */
 public interface Songs {
     String ID = "id";
-    String NAME = "song";
+    String NAME = "name";
     String ARTIST = "artist";
     String URL = "url";
 
-    @Mapper(SongMapper.class)
-    @SqlQuery("SELECT * FROM questions WHERE " + ID + " = :id")
-    Question getQuestion(@Bind("id") String id);
+    @SqlQuery("SELECT COUNT(*) FROM songs;")
+    int songCount();
 
-    @SqlUpdate("INSERT INTO questions (" + ID + "," + URL + "," + NAME + "," + ARTIST + ") " +
+    @Mapper(SongMapper.class)
+    @SqlQuery("SELECT * FROM songs WHERE " + ID + " = :id")
+    Song getSong(@Bind("id") String id);
+
+    @SqlUpdate("INSERT INTO songs (" + ID + "," + URL + "," + NAME + "," + ARTIST + ") " +
                 "VALUES (:" + ID  + ",:" + URL + ",:" + NAME + ",:" + ARTIST + ")")
-    void addSong(@BindBean("song") Song song);
+    void addSong(@BindSong Song song);
 
     class SongMapper implements ResultSetMapper<Song> {
         @Override

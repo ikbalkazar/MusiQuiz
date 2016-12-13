@@ -24,9 +24,6 @@ public interface Challenges {
     String RECEIVER_SCORE = "receiverscore";
     String STATUS = "status";
 
-    @SqlQuery("SELECT COUNT(*) FROM challenges")
-    int generateId();
-
     @Mapper(ChallengeMapper.class)
     @SqlQuery("SELECT * FROM challenges WHERE " + ID + " = :id")
     Challenge getById(@Bind("id") String id);
@@ -38,7 +35,7 @@ public interface Challenges {
     @SqlUpdate("INSERT INTO challenges (" + ID + "," + SENDER + "," + RECEIVER + "," + CREATED_AT + ","
             + SENDER_SCORE + "," + RECEIVER_SCORE + "," + STATUS + ") VALUES (:" + ID + ",:" + SENDER + ",:" + RECEIVER
             + ",:" + CREATED_AT  + ",:" + SENDER_SCORE + ",:" + RECEIVER_SCORE + ",:" + STATUS + ")")
-    void insertChallenge(@BindBean("challenge") Challenge challenge);
+    void insertChallenge(@BindChallenge Challenge challenge);
 
     @SqlUpdate("UPDATE challenges SET " + STATUS + " = :status WHERE " + ID + " = :id")
     void setStatus(@Bind("status") int status, @Bind("id") String id);
