@@ -15,5 +15,15 @@ public class Main {
                 System.err.println(error);
             }
         });
+
+        Network.registerUser(new User("watson", "baker", "question?", "answer!!"), new Network.RegisterCompletion() {
+            public void whenCompleted(boolean success) {
+                System.err.println("Registration success: " + success);
+            }
+
+            public void whenError(String error) {
+                System.err.println("ERROR: Registration error!!");
+            }
+        });
     }
 }
