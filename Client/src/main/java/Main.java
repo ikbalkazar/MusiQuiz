@@ -8,9 +8,11 @@ public class Main {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         Network.getRequest("/user/joey", new Network.Completion() {
-            @Override
-            public void onCompleted(JSONObject jsonObject) {
+            public void whenCompleted(JSONObject jsonObject) {
                 System.out.println(jsonObject);
+            }
+            public void whenError(String error) {
+                System.err.println(error);
             }
         });
     }

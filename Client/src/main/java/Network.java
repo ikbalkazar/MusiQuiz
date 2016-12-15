@@ -7,8 +7,14 @@ import org.json.JSONObject;
 public class Network {
     private final static String host = "http://localhost:8080";
 
-    public static abstract class Completion {
-        public abstract void onCompleted(JSONObject jsonObject);
+    public interface Completion {
+        void whenCompleted(JSONObject jsonObject);
+        void whenError(String error);
+    }
+
+    public interface UserCompletion {
+        void whenCompleted(User user);
+        void whenError(String error);
     }
 
     public static void getRequest(String path, final Completion completion) {
@@ -17,13 +23,14 @@ public class Network {
             @Override
             public Response onCompleted(Response response) throws Exception {
                 JSONObject json = new JSONObject(response.getResponseBody());
-                completion.onCompleted(json);
+                completion.whenCompleted(json);
                 return null;
             }
 
             @Override
             public void onThrowable(Throwable t) {
                 super.onThrowable(t);
+
             }
         });
     }
