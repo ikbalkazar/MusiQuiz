@@ -38,11 +38,20 @@ public class ChallengeResource {
         this.questionCounter = new AtomicInteger();
     }
 
+    public class ChallengeWrapper {
+        @Json
+        private List<Challenge> challenges;
+        public ChallengeWrapper(List<Challenge> challenges) {
+            this.challenges = challenges;
+        }
+    }
+
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll(@QueryParam("me") String me) {
         List<Challenge> res = challengeDB.getFor(me);
+
         return Response.status(Response.Status.OK).entity(res).build();
     }
 

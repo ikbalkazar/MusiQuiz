@@ -1,11 +1,13 @@
 import org.apache.log4j.BasicConfigurator;
 import org.json.JSONObject;
 
+import javax.security.sasl.SaslServer;
+
 /**
  * Created by ikbalkazar on 13/12/16.
  */
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
         Network.getRequest("/user/joey", new Network.Completion() {
             public void whenCompleted(JSONObject jsonObject) {
@@ -16,14 +18,46 @@ public class Main {
             }
         });
 
-        Network.registerUser(new User("watson", "baker", "question?", "answer!!"), new Network.RegisterCompletion() {
+        Network.fetchUser("watson", new Network.UserCompletion() {
+            public void whenCompleted(User user) {
+                System.out.println("Username: " + user.getUsername());
+                System.out.println("Password: " + user.getPassword());
+            }
+
+            public void whenError(String error) {
+            }
+        });
+
+        Network.registerUser(new User("missme", "baker", "question?", "answer!!"), new Network.RegisterCompletion() {
             public void whenCompleted(boolean success) {
                 System.err.println("Registration success: " + success);
             }
-
             public void whenError(String error) {
                 System.err.println("ERROR: Registration error!!");
             }
         });
+/*
+        Network.addFriend("watson", "joey");
+        Network.addFriend("watson", "missme");
+
+        Thread.sleep(1000);
+
+        Network.deleteFriend("watson", "missme");
+*/
+
+        Network.fetchFriends("watson", new Network.FriendsCompletion() {
+            public void whenCompleted(String[] friends) {
+                System.out.println("Got friends of watson");
+                for (int i = 0; i < friends.length; i++) {
+                    System.out.println(friends[i]);
+                }
+            }
+
+            public void whenError(String error) {
+                System.out.println("Friends fetch ERROR!!!!!....");
+            }
+        });
+
+
     }
 }

@@ -1,6 +1,7 @@
 package com.example.restapi.Resource;
 
 import com.example.restapi.Database.Friends;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -23,7 +24,8 @@ public class FriendResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFriends(@PathParam("me") String me) {
         List<String> friends = friendDB.getFriendsOf(me);
-        return Response.status(Response.Status.OK).entity(friends).build();
+        FriendsWrapper wrapper = new FriendsWrapper(friends);
+        return Response.status(Response.Status.OK).entity(wrapper).build();
     }
 
     @POST
@@ -38,5 +40,13 @@ public class FriendResource {
     public Response removeFriend(@PathParam("me") String me, @PathParam("her") String her) {
         friendDB.removeFriend(me, her);
         return Response.status(Response.Status.OK).build();
+    }
+
+    public class FriendsWrapper {
+        @JsonProperty
+        private List<String> friends;
+        public FriendsWrapper(List<String> friends) {
+            this.friends = friends;
+        }
     }
 }

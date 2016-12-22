@@ -72,7 +72,7 @@ public class Network {
     }
 
     public static void fetchUser(String username, final UserCompletion completion) {
-        getRequest(host + "/user/" + username, new Completion() {
+        getRequest("/user/" + username, new Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 completion.whenCompleted(new User(jsonObject.getString("username"),
                         jsonObject.getString("password"),
@@ -95,7 +95,7 @@ public class Network {
     }
 
     public static void fetchFriends(String username, final FriendsCompletion completion) {
-        getRequest(host + "/friends/" + username, new Completion() {
+        getRequest("/friends/" + username, new Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 JSONArray jsonArray = jsonObject.getJSONArray("friends");
                 String[] friends = new String[jsonArray.length()];
