@@ -2,6 +2,7 @@ package com.example.restapi.Resource;
 
 import com.example.restapi.Database.Questions;
 import com.example.restapi.Model.Question;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -23,6 +24,14 @@ public class QuestionResource {
         this.questionDB = questionDB;
     }
 
+    public class QuestionWrapper {
+        @JsonProperty
+        private List<Question> questions;
+        public QuestionWrapper(List<Question> questions) {
+            this.questions = questions;
+        }
+    }
+
     @GET
     @Path("/{challengeId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -31,6 +40,7 @@ public class QuestionResource {
         if (questions == null || questions.size() != 10) {
             return Response.status(Response.Status.NO_CONTENT).build();
         }
-        return Response.ok(questions).build();
+        QuestionWrapper wrapper = new QuestionWrapper(questions);
+        return Response.ok(wrapper).build();
     }
 }

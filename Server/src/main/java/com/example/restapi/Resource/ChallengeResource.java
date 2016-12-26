@@ -6,6 +6,7 @@ import com.example.restapi.Database.Songs;
 import com.example.restapi.Model.Challenge;
 import com.example.restapi.Model.Question;
 import com.example.restapi.Model.Song;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,7 +40,7 @@ public class ChallengeResource {
     }
 
     public class ChallengeWrapper {
-        @Json
+        @JsonProperty
         private List<Challenge> challenges;
         public ChallengeWrapper(List<Challenge> challenges) {
             this.challenges = challenges;
@@ -51,8 +52,8 @@ public class ChallengeResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll(@QueryParam("me") String me) {
         List<Challenge> res = challengeDB.getFor(me);
-
-        return Response.status(Response.Status.OK).entity(res).build();
+        ChallengeWrapper wrapper = new ChallengeWrapper(res);
+        return Response.status(Response.Status.OK).entity(wrapper).build();
     }
 
     @POST

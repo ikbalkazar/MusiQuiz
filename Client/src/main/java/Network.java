@@ -31,6 +31,14 @@ public class Network {
         void whenCompleted(boolean success);
     }
 
+    public interface QuestionCompletion extends ErrorCompletion {
+        void whenCompleted(Question[] questions);
+    }
+
+    public interface ChallengeCompletion extends ErrorCompletion {
+        void whenCompleted();
+    }
+
     public static void getRequest(String path, final Completion completion) {
         client.prepareGet(host + path).execute(new AsyncCompletionHandler<Response>() {
             @Override
@@ -107,6 +115,55 @@ public class Network {
 
             public void whenError(String error) {
                 completion.whenError(error);
+            }
+        });
+    }
+
+    public static void getQuestions(int challengeId, final QuestionCompletion completion) {
+        getRequest("/question/" + challengeId, new Completion() {
+            public void whenCompleted(JSONObject jsonObject) {
+                JSONArray jsonArray = jsonObject.getJSONArray("questions");
+                Question[] questions = new Question[10];
+                for (int i = 0; i < questions.length; i++) {
+                    JSONObject jsonItem = jsonArray.getJSONObject(i);
+                    JSONArray choicesArray = jsonItem.getJSONArray("choices");
+                    String[] choices = new String[4];
+                    for (int j = 0; j < 4; j++) {
+                        choices[j] = choicesArray.getString(j);
+                    }
+                    String url = jsonItem.getString("songUrl");
+                    questions[i] = new Question(choices, url);
+                }
+                completion.whenCompleted(questions);
+            }
+
+            public void whenError(String error) {
+                completion.whenError(error);
+            }
+        });
+    }
+
+    public static void createChallenge(String username, String friend) {
+        client.preparePost(host + "/challenge/create?me=" + username + "&her=" + friend).execute();
+    }
+
+    public static void acceptChallenge(String username, String challengeId) {
+        client.preparePut(host + "/challenge/accept?me=" + username + "&id=" + challengeId).execute();
+    }
+
+    public static void finishChallenge(String username, String challengeId, int score) {
+        client.preparePut(host + "/challenge/finish?me=" + username + "&id=" + challengeId + "&score=" + score).execute();
+    }
+
+    public static void getChallenges(final String username) {
+        getRequest("/challenge/all?me=" + username, new Completion() {
+            public void whenCompleted(JSONObject jsonObject) {
+                System.out.println("Got challenges of " + username);
+                System.out.println(jsonObject);
+            }
+
+            public void whenError(String error) {
+                System.out.println("Error...");
             }
         });
     }

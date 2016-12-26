@@ -1,5 +1,7 @@
 import org.apache.log4j.BasicConfigurator;
 import org.json.JSONObject;
+import sun.awt.windows.ThemeReader;
+import sun.nio.ch.Net;
 
 import javax.security.sasl.SaslServer;
 
@@ -9,6 +11,7 @@ import javax.security.sasl.SaslServer;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
+/*
         Network.getRequest("/user/joey", new Network.Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 System.out.println(jsonObject);
@@ -36,14 +39,13 @@ public class Main {
                 System.err.println("ERROR: Registration error!!");
             }
         });
-/*
+
         Network.addFriend("watson", "joey");
         Network.addFriend("watson", "missme");
 
         Thread.sleep(1000);
 
         Network.deleteFriend("watson", "missme");
-*/
 
         Network.fetchFriends("watson", new Network.FriendsCompletion() {
             public void whenCompleted(String[] friends) {
@@ -58,6 +60,31 @@ public class Main {
             }
         });
 
+        Network.getQuestions(2, new Network.QuestionCompletion() {
+            public void whenCompleted(Question[] questions) {
+                System.out.println("Questions got!!");
+                for (int i = 0; i < 10; i++) {
+                    System.out.println("Question : " + questions[i].getURL());
+                }
+            }
 
+            public void whenError(String error) {
+            }
+        });
+*/
+/*
+        Network.createChallenge("watson", "joey");
+
+        Thread.sleep(1000);
+
+        Network.getChallenges("watson");
+*/
+        /*
+        Network.acceptChallenge("joey", "0");
+
+        Thread.sleep(1000);
+
+        Network.finishChallenge("watson", "0", 7);
+        Network.finishChallenge("joey", "0", 12);*/
     }
 }
