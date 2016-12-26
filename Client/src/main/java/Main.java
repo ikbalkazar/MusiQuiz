@@ -86,5 +86,18 @@ public class Main {
 
         Network.finishChallenge("watson", "0", 7);
         Network.finishChallenge("joey", "0", 12);*/
+
+        Network.getChallenges("watson", new Network.ChallengeCompletion() {
+            public void whenCompleted(Challenge[] challenges) {
+                System.out.println("Got challenges of watson");
+                for (int i = 0; i < challenges.length; i++) {
+                    System.out.println("Id: " + challenges[i].getId() + " CreatedAt: " + challenges[i].getCreatedAt());
+                }
+            }
+
+            public void whenError(String error) {
+
+            }
+        });
     }
 }

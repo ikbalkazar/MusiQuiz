@@ -36,7 +36,7 @@ public class Network {
     }
 
     public interface ChallengeCompletion extends ErrorCompletion {
-        void whenCompleted();
+        void whenCompleted(Challenge[] challenges);
     }
 
     public static void getRequest(String path, final Completion completion) {
@@ -155,15 +155,31 @@ public class Network {
         client.preparePut(host + "/challenge/finish?me=" + username + "&id=" + challengeId + "&score=" + score).execute();
     }
 
-    public static void getChallenges(final String username) {
+    public static void getChallenges(final String username, final ChallengeCompletion completion) {
         getRequest("/challenge/all?me=" + username, new Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 System.out.println("Got challenges of " + username);
                 System.out.println(jsonObject);
+
+                JSONArray jsonArray = jsonObject.getJSONArray("challenges");
+                Challenge[] challenges = new Challenge[jsonArray.length()];
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject item = jsonArray.getJSONObject(i);
+                    challenges[i] = new Challenge(item.getString("id"),
+                            item.getString("sender"),
+                            item.getString("receiver"),
+                            item.getString("createdAt"),
+                            item.getInt("senderScore"),
+                            item.getInt("recieverScore"),
+                            item.getInt("status"));
+                }
+
+                completion.whenCompleted(challenges);
             }
 
             public void whenError(String error) {
                 System.out.println("Error...");
+                completion.whenError("Error getting challenges...");
             }
         });
     }
