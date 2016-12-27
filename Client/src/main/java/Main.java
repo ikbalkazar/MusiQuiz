@@ -4,14 +4,47 @@ import sun.awt.windows.ThemeReader;
 import sun.nio.ch.Net;
 
 import javax.security.sasl.SaslServer;
+import javax.swing.*;
+import java.awt.*;
+import java.time.chrono.JapaneseChronology;
 
 /**
  * Created by ikbalkazar on 13/12/16.
  */
 public class Main {
+    public static User user = null;
+    public static JFrame mainFrame;
+    public static final int WIDTH = 700;
+    public static final int HEIGHT = 400;
+
     public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
-/*
+        mainFrame = new JFrame();
+        mainFrame.setLayout(new BorderLayout());
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        user = new User("watson", "baker", "asdasd", "qweqwe");
+
+        goToPanel(new MultiGamePlay());
+    }
+
+    public static void goToPanel(final JPanel jpanel) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    mainFrame.add(jpanel, BorderLayout.CENTER);
+                } catch (Exception e) {
+
+                }
+                mainFrame.setSize(WIDTH, HEIGHT);
+                mainFrame.revalidate();
+                mainFrame.setVisible(true);
+            }
+        });
+    }
+
+    public static void testNetwork() {
+        /*
         Network.getRequest("/user/joey", new Network.Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 System.out.println(jsonObject);
