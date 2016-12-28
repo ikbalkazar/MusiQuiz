@@ -24,7 +24,7 @@ public class MainTester {
         
         
         MainMenu MainMenuPanel = new MainMenu();
-        GamePlay GamePlayPanel = new GamePlay();
+        GamePlay GamePlayPanel = new GamePlay("1", new Question[2]);
         
         frame.add(GamePlayPanel);
         frame.pack();

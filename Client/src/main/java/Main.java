@@ -47,12 +47,19 @@ public class Main {
 
     public static void startGame(String challengeId, Question[] questions) {
         System.out.println("||| Starting Challenge.... " + challengeId + " : " + questions.length);
-        GamePlay gamePlay = new GamePlay();
+        GamePlay gamePlay = new GamePlay(challengeId, questions);
         cards.add(gamePlay, "GamePlay" + challengeId);
         goToPanel("GamePlay" + challengeId);
         for (int i = 0; i < 11; i++) {
+            if (gamePlay.exited) {
+                break;
+            }
             try {
-                gamePlay.play(i, 45);
+                if (i < 10) {
+                    gamePlay.playSong(questions[i].getURL());
+                }
+                gamePlay.play(i, 30);
+                gamePlay.mp3player.close();
                 Thread.sleep(1000);
             } catch (Exception e) {
 

@@ -11,7 +11,7 @@ public class Question {
 
         this.choices = choices;
         this.URL = URL;
-
+        shuffleChoices();
     }
 
     public void setChoices(String[] choices) {

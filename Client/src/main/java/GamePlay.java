@@ -1,14 +1,18 @@
 
-import com.sun.deploy.panel.ExceptionListDialog;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
 
 import java.awt.*;
 import java.awt.event.*;
-import static java.lang.Thread.sleep;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 /**
  * @author Şamil
@@ -42,7 +46,7 @@ public class GamePlay extends JPanel {
         choices = new String[4];
         correctChoices = new int[10];
         answered = new boolean[10];
-        
+
         choices[0] = "choice0";
         choices[1] = "choice1";
         choices[2] = "choice2";
@@ -50,7 +54,7 @@ public class GamePlay extends JPanel {
         
         for ( int i=0 ; i<10 ; i++ ){
             questions[i] = "Question Text " + (i+1) + "......................... ?";
-            correctChoices[i] = i%4;
+            correctChoices[i] = questionsArray[i].getCorrectChoice();
             answered[i] = false;
         }
         
@@ -62,6 +66,31 @@ public class GamePlay extends JPanel {
     
     public void waitSomeTime( int x ){
         for (long stop=System.nanoTime()+TimeUnit.SECONDS.toNanos(x);stop>System.nanoTime();) {}
+    }
+
+    public Player mp3player;
+
+    public void playSong(String song) {
+        mp3player = null;
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new URL(song).openStream());
+            mp3player = new Player(in);
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    try {
+                        mp3player.play();
+                    } catch (Exception e) {
+
+                    }
+                }
+            };
+            new Thread(runnable).start();
+        } catch (MalformedURLException ex) {
+        } catch (IOException e) {
+        } catch (JavaLayerException e) {
+        } catch (NullPointerException ex) {
+        }
     }
     
     public void play( int q , int time ) throws InterruptedException{
@@ -80,7 +109,7 @@ public class GamePlay extends JPanel {
         L.show( this, ""+q );
         repaint();
         revalidate();
-        
+
         System.out.println("questionNumber : " + q + "      score : " + score +  "    time : " + time);
         
         panels[q].remove(timeLabel[q]);
@@ -104,7 +133,7 @@ public class GamePlay extends JPanel {
         
         repaint();
         revalidate();
-        
+
         if ( time > 0 && answered[q] == false ){
             
             waitSomeTime(1);
@@ -135,14 +164,15 @@ public class GamePlay extends JPanel {
     private class ExitListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             exited = true;
+            mp3player.close();
             Network.finishChallenge(Main.user.getUsername(), challengeId, score);
             Main.goToPanel("MainMenu");
         }
     }
     
-    public GamePlay(String challengeId, Question[] questions){
+    public GamePlay(String challengeId, Question[] questionsAr){
         this.challengeId = challengeId;
-        this.questionsArray = questions;
+        this.questionsArray = questionsAr;
 
         setQuestions();
         setLayout( new CardLayout() );
@@ -184,7 +214,13 @@ public class GamePlay extends JPanel {
             scoreLabel[i] = new JLabel( "Your Score : " + score );
             scoreLabel[i].setFont(new Font("Serif", Font.PLAIN, 18));
             scoreLabel[i].setBounds(550,200,120,40);
-        
+
+            choices = questionsArray[i].getChoices();
+
+            for (int j = 0; j < 4; j++) {
+                choices[j] = (j+1) + " ) " + choices[j];
+            }
+
             button1[i] = new JButton( choices[0] );
             button1[i].setFont(new Font("Serif", Font.PLAIN, 25));
             button1[i].setBounds( 200 , 150 , 300 , 40 );
@@ -266,7 +302,7 @@ public class GamePlay extends JPanel {
             
             System.out.println("answered " + NO + " true");
             
-            if ( answer.equals( "choice"+correctChoices[NO] ) ){
+            if ( answer.charAt(0) - '0' == correctChoices[NO] + 1){
                 
                 System.out.println("Correct Answer!");
                 

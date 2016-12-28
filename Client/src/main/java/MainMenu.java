@@ -3,15 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import sun.security.jgss.spnego.NegTokenInit;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-
-import static java.lang.Thread.sleep;
 
 
 /**
@@ -342,7 +339,10 @@ public class MainMenu extends JPanel {
                     if (challenges[i].getStatus() == 0 && !challenges[i].getSender().equals(Main.user.getUsername())) {
                         waitings.add(challenges[i]);
                     } else if (challenges[i].getStatus() == 1) {
-                        actives.add(challenges[i]);
+                        if ((challenges[i].getSender().equals(Main.user.getUsername()) && challenges[i].getSenderScore() == -1) ||
+                                (challenges[i].getReceiver().equals(Main.user.getUsername()) && challenges[i].getReceiverScore() == -1)) {
+                            actives.add(challenges[i]);
+                        }
                     } else if (challenges[i].getStatus() == 2) {
                         finishedOnes.add(challenges[i]);
                     }
