@@ -1,4 +1,6 @@
 
+import com.sun.deploy.panel.ExceptionListDialog;
+
 import java.awt.*;
 import java.awt.event.*;
 import static java.lang.Thread.sleep;
@@ -12,7 +14,8 @@ import javax.swing.table.DefaultTableModel;
  * @author Şamil
  */
 public class GamePlay extends JPanel {
-
+    private String challengeId;
+    private Question[] questionsArray;
     JLabel[] questionNo;
     JButton[] exitButton;
     JLabel[] timeLabel;
@@ -125,17 +128,22 @@ public class GamePlay extends JPanel {
         JButton exitButton = new JButton("Exit");
         exitButton.setBounds(300 , 310 , 100 , 40);
         panels[10].add( exitButton );
+
+        exitButton.addActionListener(new ExitListener());
     }
 
     private class ExitListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             exited = true;
-            Network.finishChallenge();
+            Network.finishChallenge(Main.user.getUsername(), challengeId, score);
             Main.goToPanel("MainMenu");
         }
     }
     
-    public GamePlay(){
+    public GamePlay(String challengeId, Question[] questions){
+        this.challengeId = challengeId;
+        this.questionsArray = questions;
+
         setQuestions();
         setLayout( new CardLayout() );
 
@@ -201,6 +209,7 @@ public class GamePlay extends JPanel {
             exitButton[i] = new JButton("Exit");
             exitButton[i].setFont(new Font("Serif", Font.PLAIN, 15));
             exitButton[i].setBounds( 30 , 350 , 80 , 30 );
+            exitButton[i].addActionListener(new ExitListener());
             
             panels[i].add(questionNo[i]);
             panels[i].add(timeLabel[i]);
