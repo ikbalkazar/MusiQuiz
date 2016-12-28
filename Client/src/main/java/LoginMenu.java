@@ -86,7 +86,7 @@ public class LoginMenu extends JPanel {
 		add(userNameField);
 		userNameField.setColumns(10);
 		
-		passwordField = new JTextField();
+		passwordField = new JPasswordField();
 		passwordField.setBounds(282, 130, 205, 20);
 		add(passwordField);
 		passwordField.setColumns(10);
