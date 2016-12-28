@@ -65,7 +65,14 @@ public class MainMenu extends JPanel {
         
         deleteFriend = new JButton("Delete");
         challengeFriend = new JButton("ChallengeFriend");
-        
+
+        challengeFriend.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String friend = friendNames[friendsCombo.getSelectedIndex()];
+                Network.createChallenge(Main.user.getUsername(), friend);
+            }
+        });
+
         deleteFriend.addActionListener(new DeleteListener());
         
         deleteFriend.setBounds(20,90,120,40);
@@ -154,7 +161,7 @@ public class MainMenu extends JPanel {
         
     }
     
-    public void createActiveGamesPanel(ArrayList<Challenge> challenges){
+    public void createActiveGamesPanel(final ArrayList<Challenge> challenges){
         activeGames = new JPanel();
         activeGames.setPreferredSize(new Dimension( 300 , 200 ));        
         
@@ -163,7 +170,16 @@ public class MainMenu extends JPanel {
         JLabel panelName = new JLabel("ACTIVE GAMES");
         panelName.setBounds(120,-30,100,100);
 
-        activeGamesBox = new JComboBox( friendNames );
+        String[] chNames = new String[challenges.size() + 1];
+        chNames[0] = "Select a challenge...";
+        for (int i = 0; i < challenges.size(); i++) {
+            String other = challenges.get(i).getSender();
+            if (other.equals(Main.user.getUsername())) {
+                other = challenges.get(i).getReceiver();
+            }
+            chNames[i + 1] = other;
+        }
+        activeGamesBox = new JComboBox( chNames );
         
         activeGamesBox.setBounds( 40 , 60 , 220 , 40 );
         activeGamesBox.addActionListener(new ActiveGamesListener());
@@ -171,6 +187,22 @@ public class MainMenu extends JPanel {
         startGame = new JButton("Start");
         startGame.setEnabled(false);
         startGame.setBounds( 100 , 120 , 100 , 40 );
+
+        startGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int chosen = activeGamesBox.getSelectedIndex() - 1;
+                final String challengeId = challenges.get(chosen).getId();
+                Network.getQuestions(challengeId, new Network.QuestionCompletion() {
+                    public void whenCompleted(Question[] questions) {
+                        Main.startGame(challengeId, questions);
+                    }
+
+                    public void whenError(String error) {
+
+                    }
+                });
+            }
+        });
         
         activeGames.add( panelName );
         activeGames.add( activeGamesBox );
@@ -178,7 +210,7 @@ public class MainMenu extends JPanel {
         
     }
     
-    public void createWaitingChallengesPanel(ArrayList<Challenge> challenges){
+    public void createWaitingChallengesPanel(final ArrayList<Challenge> challenges){
         waitingChallenges = new JPanel();
         waitingChallenges.setPreferredSize(new Dimension( 300 , 200 ));
         
@@ -187,7 +219,7 @@ public class MainMenu extends JPanel {
         JLabel panelName = new JLabel("WAITING CHALLENGES");
         panelName.setBounds(90,-30,140,100);
 
-        String[] challengeNames = new String[challenges.size() + 1];
+        final String[] challengeNames = new String[challenges.size() + 1];
         challengeNames[0] = "Select a challenge...";
         for (int i = 0; i < challenges.size(); i++) {
             challengeNames[i + 1] = challenges.get(i).getSender();
@@ -213,6 +245,24 @@ public class MainMenu extends JPanel {
         waitingChallenges.add( acceptChallenge );
         waitingChallenges.add( rejectChallenge );
 
+        acceptChallenge.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int chosen = waitingChallengesBox.getSelectedIndex() - 1;
+                String challengeId = challenges.get(chosen).getId();
+                Network.acceptChallenge(Main.user.getUsername(), challengeId);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                          Thread.sleep(1000);
+                        } catch (Exception e) {
+
+                        }
+                        refresh();
+                    }
+                });
+            }
+        });
+
         JButton refresh = new JButton("Refresh");
         refresh.setBounds( 220 , 0 , 80 , 20);
         refresh.addActionListener( new refreshListener() );
@@ -222,18 +272,60 @@ public class MainMenu extends JPanel {
     public MainMenu() {
         setBackground (Color.cyan);
         setPreferredSize( new Dimension( 700 , 400 ) );
-        refresh();
+
+        friendNames = new String[1];
+        friendNames[0] = "Select a friend...";
+        waitings = new ArrayList<Challenge>();
+        actives = new ArrayList<Challenge>();
+        finishedOnes = new ArrayList<Challenge>();
+
+        refreshUI();
     }
 
-    private void refresh() {
+    public void clearUI() {
+        remove(friends);
+        remove(waitingChallenges);
+        remove(matchHistory);
+        remove(activeGames);
+
+        repaint();
+        revalidate();
+    }
+
+    public void refreshUI() {
+        createFriendsPanel();
+        add( friends );
+        createWaitingChallengesPanel(waitings);
+        createMatchHistoryPanel(finishedOnes);
+        createActiveGamesPanel(actives);
+        add( waitingChallenges );
+        add( matchHistory );
+        add( activeGames );
+
+        repaint();
+        revalidate();
+    }
+
+    public void refresh() {
+        if (Main.user == null) {
+            return;
+        }
+
         Network.fetchFriends(Main.user.getUsername(), new Network.FriendsCompletion() {
             public void whenCompleted(String[] friendNamesGot) {
+                System.out.println("Got friends of " + Main.user.getUsername() + " => " + friendNamesGot.length);
                 friendNames = new String[friendNamesGot.length + 1];
                 friendNames[0] = "Select a friend...";
                 for (int i = 0; i < friendNamesGot.length; i++) {
                     friendNames[i + 1] = friendNamesGot[i];
                 }
                 friendCount = friendNamesGot.length;
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        clearUI();
+                        refreshUI();
+                    }
+                });
             }
 
             public void whenError(String error) {
@@ -241,11 +333,11 @@ public class MainMenu extends JPanel {
             }
         });
 
-        waitings = new ArrayList<Challenge>();
-        actives = new ArrayList<Challenge>();
-        finishedOnes = new ArrayList<Challenge>();
         Network.getChallenges(Main.user.getUsername(), new Network.ChallengeCompletion() {
             public void whenCompleted(Challenge[] challenges) {
+                waitings.clear();
+                actives.clear();
+                finishedOnes.clear();
                 for (int i = 0; i < challenges.length; i++) {
                     if (challenges[i].getStatus() == 0 && !challenges[i].getSender().equals(Main.user.getUsername())) {
                         waitings.add(challenges[i]);
@@ -255,47 +347,24 @@ public class MainMenu extends JPanel {
                         finishedOnes.add(challenges[i]);
                     }
                 }
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        clearUI();
+                        refreshUI();
+                    }
+                });
             }
 
             public void whenError(String error) {
 
             }
         });
-
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-
-        }
-
-        createFriendsPanel();
-        add( friends );
-        createWaitingChallengesPanel(waitings);
-        createMatchHistoryPanel(finishedOnes);
-        createActiveGamesPanel(actives);
-        add( waitingChallenges );
-        add( matchHistory );
-        add( activeGames );
     }
 
     private class refreshListener implements ActionListener{
 
         public void actionPerformed ( ActionEvent event ){
-
-            remove(friends);
-            remove(waitingChallenges);
-            remove(matchHistory);
-            remove(activeGames);
-
-            repaint();
-            revalidate();
-
             refresh();
-
-            repaint();
-            revalidate();
-
-
         }
 
     }
@@ -348,6 +417,11 @@ public class MainMenu extends JPanel {
         public void actionPerformed( ActionEvent event ){
             int index = friendsCombo.getSelectedIndex();
             Network.deleteFriend(Main.user.getUsername(), friendNames[index]);
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refresh();
+                }
+            });
         }
         
     }
@@ -356,6 +430,11 @@ public class MainMenu extends JPanel {
      
         public void actionPerformed( ActionEvent event ){
             Network.addFriend(Main.user.getUsername(), addFriendText.getText());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refresh();
+                }
+            });
         }
         
     }

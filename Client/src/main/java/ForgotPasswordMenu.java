@@ -1,89 +1,130 @@
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import java.awt.Font;
-import java.awt.Color;
 import javax.swing.JButton;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
 
-public class ForgotPasswordMenu {
+public class ForgotPasswordMenu extends JPanel 
+{
+	
+	private JTextField usernameField;
+	private JTextField answerField;
+	private boolean usernameFlag = false;
+	private boolean securityFlag = false;
+	private String securityQuestion, password;
+	
+	public boolean isUsernameFlag() 
+	{
+		return usernameFlag;
+	}
 
- private JFrame frame;
- private JTextField textField;
- private JTextField textField_1;
-/*
- public static void main(String[] args) {
-  EventQueue.invokeLater(new Runnable() {
-   public void run() {
-    try {
-     ForgotPasswordMenu window = new ForgotPasswordMenu();
-     window.frame.setVisible(true);
-    } catch (Exception e) {
-     e.printStackTrace();
-    }
-   }
-  });
- }
-*/
- /**
-  * Create the application.
-  */
- public ForgotPasswordMenu() {
-  initialize();
- }
+	public void setUsernameFlag(boolean usernameFlag)
+	{
+		this.usernameFlag = usernameFlag;
+	}
 
- /**
-  * Initialize the contents of the frame.
-  */
- private void initialize() {
-  frame = new JFrame();
-  frame.setBounds(100, 100, 450, 300);
-  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  frame.getContentPane().setLayout(null);
-  
-  JLabel lblUsername = new JLabel("Username :");
-  lblUsername.setBounds(64, 63, 92, 14);
-  frame.getContentPane().add(lblUsername);
-  
-  JLabel lblSecurityQuestion = new JLabel("Security Question :");
-  lblSecurityQuestion.setBounds(64, 88, 125, 14);
-  frame.getContentPane().add(lblSecurityQuestion);
-  
-  textField = new JTextField();
-  textField.setBounds(194, 60, 176, 20);
-  frame.getContentPane().add(textField);
-  textField.setColumns(10);
-  
-  textField_1 = new JTextField();
-  textField_1.setBounds(194, 139, 172, 20);
-  frame.getContentPane().add(textField_1);
-  textField_1.setColumns(10);
-  
-  JLabel lblNewLabel = new JLabel("Own question\r\n");
-  lblNewLabel.setBounds(199, 88, 225, 14);
-  frame.getContentPane().add(lblNewLabel);
-  
-  JLabel lblYourAnswer = new JLabel("Your Answer :");
-  lblYourAnswer.setBounds(64, 142, 111, 14);
-  frame.getContentPane().add(lblYourAnswer);
-  
-  JLabel lblYourPasswordIs = new JLabel("Your Password is :");
-  lblYourPasswordIs.setBounds(64, 167, 111, 14);
-  frame.getContentPane().add(lblYourPasswordIs);
-  
-  JLabel lblNewLabel_1 = new JLabel("the password\r\n");
-  lblNewLabel_1.setBounds(194, 170, 211, 14);
-  frame.getContentPane().add(lblNewLabel_1);
-  
-  JLabel lblForgotPassword = new JLabel("FORGOT PASSWORD");
-  lblForgotPassword.setForeground(Color.BLUE);
-  lblForgotPassword.setFont(new Font("Tahoma", Font.BOLD, 17));
-  lblForgotPassword.setBounds(140, 11, 217, 14);
-  frame.getContentPane().add(lblForgotPassword);
-  
-  JButton btnBack = new JButton("Back");
-  btnBack.setBounds(181, 227, 89, 23);
-  frame.getContentPane().add(btnBack);
- }
+	public boolean isSecurityFlag() 
+	{
+		return securityFlag;
+	}
+
+	public void setSecurityFlag(boolean securityFlag) 
+	{
+		this.securityFlag = securityFlag;
+	}
+
+	/**
+	 * Create the panel.
+	 */
+	public ForgotPasswordMenu() {
+		setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("Username :");
+		lblNewLabel.setBounds(163, 90, 80, 14);
+		add(lblNewLabel);
+		
+		JLabel lblNewLabel_1 = new JLabel("Security Question :");
+		lblNewLabel_1.setBounds(125, 115, 106, 14);
+		add(lblNewLabel_1);
+		lblNewLabel_1.setVisible(usernameFlag);
+		
+		usernameField = new JTextField();
+		usernameField.setBounds(310, 87, 150, 20);
+		add(usernameField);
+		usernameField.setColumns(10);
+		
+		final JLabel securityLabel = new JLabel(securityQuestion);
+		securityLabel.setBounds(310, 115, 150, 14);
+		add(securityLabel);
+		securityLabel.setVisible(usernameFlag);
+		
+		JLabel forgotPasswordMenu = new JLabel("Forget Password ?");
+		forgotPasswordMenu.setForeground(Color.BLUE);
+		forgotPasswordMenu.setFont(new Font("Tahoma", Font.BOLD, 21));
+		forgotPasswordMenu.setBounds(275, 11, 212, 26);
+		add(forgotPasswordMenu);
+		
+		JLabel lblNewLabel_4 = new JLabel("Your Asnwer :");
+		lblNewLabel_4.setBounds(146, 203, 109, 14);
+		add(lblNewLabel_4);
+		lblNewLabel_4.setVisible(usernameFlag);
+		
+		
+		JLabel lblNewLabel_5 = new JLabel("Your Password is :");
+		lblNewLabel_5.setBounds(125, 228, 123, 14);
+		add(lblNewLabel_5);
+		lblNewLabel_5.setVisible(securityFlag);
+		
+		JButton enterButton = new JButton("Enter");
+		enterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				
+				if(isUsernameFlag())
+				{
+					
+				}
+			}
+		});
+		enterButton.setBounds(196, 338, 89, 23);
+		add(enterButton);
+		enterButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Network.fetchUser(usernameField.getText(), new Network.UserCompletion() {
+					public void whenCompleted(User user) {
+						securityLabel.setText(user.getSecurityQuestion());
+					}
+
+					public void whenError(String error) {
+
+					}
+				});
+			}
+		});
+		
+		JButton backButton = new JButton("Back");
+		backButton.setBounds(424, 338, 89, 23);
+		add(backButton);
+		backButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Main.goToPanel("LoginMenu");
+			}
+		});
+		
+		answerField = new JTextField();
+		answerField.setBounds(310, 200, 150, 20);
+		add(answerField);
+		answerField.setColumns(10);
+		answerField.setVisible(usernameFlag);
+		
+		JLabel lblThePassword = new JLabel(password);
+		lblThePassword.setBounds(310, 228, 131, 14);
+		add(lblThePassword);
+		lblThePassword.setVisible(securityFlag);
+		
+
+	}
 }

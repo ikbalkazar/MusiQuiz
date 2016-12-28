@@ -3,10 +3,8 @@ import org.json.JSONObject;
 import sun.awt.windows.ThemeReader;
 import sun.nio.ch.Net;
 
-import javax.security.sasl.SaslServer;
 import javax.swing.*;
 import java.awt.*;
-import java.time.chrono.JapaneseChronology;
 
 /**
  * Created by ikbalkazar on 13/12/16.
@@ -16,6 +14,9 @@ public class Main {
     public static JFrame mainFrame;
     public static final int WIDTH = 700;
     public static final int HEIGHT = 400;
+    private static JPanel cards;
+
+    public static MainMenu mainMenu;
 
     public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
@@ -23,22 +24,47 @@ public class Main {
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        user = new User("watson", "baker", "asdasd", "qweqwe");
+        cards = new JPanel(new CardLayout());
 
-        goToPanel(new MultiGamePlay());
+        cards.add(new SignupMenu(), "SignupMenu");
+        cards.add(new ForgotPasswordMenu(), "ForgotPasswordMenu");
+        cards.add(new LoginMenu(), "LoginMenu");
+
+        mainFrame.getContentPane().add(cards);
+        mainFrame.setSize(WIDTH, HEIGHT);
+        mainFrame.setVisible(true);
+
+        goToPanel("LoginMenu");
     }
 
-    public static void goToPanel(final JPanel jpanel) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    mainFrame.add(jpanel, BorderLayout.CENTER);
-                } catch (Exception e) {
+    public static void loginWith(User user) {
+        Main.user = user;
+        mainMenu = new MainMenu();
+        mainMenu.refresh();
+        cards.add(mainMenu, "MainMenu");
+        goToPanel("MainMenu");
+    }
 
-                }
-                mainFrame.setSize(WIDTH, HEIGHT);
-                mainFrame.revalidate();
-                mainFrame.setVisible(true);
+    public static void startGame(String challengeId, Question[] questions) {
+        System.out.println("||| Starting Challenge.... " + challengeId + " : " + questions.length);
+        GamePlay gamePlay = new GamePlay();
+        cards.add(gamePlay, "GamePlay" + challengeId);
+        goToPanel("GamePlay" + challengeId);
+        for (int i = 0; i < 11; i++) {
+            try {
+                gamePlay.play(i, 45);
+                Thread.sleep(1000);
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
+    public static void goToPanel(final String panelIdentifier) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                CardLayout cardLayout = (CardLayout)cards.getLayout();
+                cardLayout.show(cards, panelIdentifier);
             }
         });
     }

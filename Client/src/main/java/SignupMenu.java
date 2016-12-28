@@ -46,6 +46,12 @@ public class SignupMenu extends JPanel implements ActionListener{
       PasswordField.addActionListener(this);
       ConfirmPasswordField.addActionListener(this);
 
+      backButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          Main.goToPanel("LoginMenu");
+        }
+      });
+
       add(backButton);
       add(createAccountButton);
       add(Name);
@@ -74,8 +80,8 @@ public class SignupMenu extends JPanel implements ActionListener{
         Network.registerUser(newUser, new Network.RegisterCompletion() {
           public void whenCompleted(boolean success) {
             if (success) {
-              Main.user = newUser;
               JOptionPane.showMessageDialog(null, "You're signed up");
+              Main.loginWith(newUser);
             } else {
               JOptionPane.showMessageDialog(null, "Password does not match");
             }

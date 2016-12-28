@@ -119,7 +119,7 @@ public class Network {
         });
     }
 
-    public static void getQuestions(int challengeId, final QuestionCompletion completion) {
+    public static void getQuestions(String challengeId, final QuestionCompletion completion) {
         getRequest("/question/" + challengeId, new Completion() {
             public void whenCompleted(JSONObject jsonObject) {
                 JSONArray jsonArray = jsonObject.getJSONArray("questions");
